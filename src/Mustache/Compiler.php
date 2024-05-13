@@ -570,18 +570,23 @@ class Mustache_Compiler
         if (!(%s)) {
             throw new Mustache_Exception_UnknownFilterException(%s);
         }
-        $value = call_user_func($filter, $value);%s
+        $value = call_user_func($filter, %s);%s
     ';
+    const FILTER_FIRST_VALUE = '$this->resolveValue($value, $context)';
+    const FILTER_VALUE = '$value';
 
     /**
      * Generate Mustache Template variable filtering PHP source.
      *
+     * If the initial $value is a lambda it will be resolved before starting the filter chain.
+     *
      * @param string[] $filters Array of filters
      * @param int      $level
+     * @param bool     $first (default: false)
      *
      * @return string Generated filter PHP source
      */
-    private function getFilters(array $filters, $level)
+    private function getFilters(array $filters, $level, $first = true)
     {
         if (empty($filters)) {
             return '';
@@ -593,8 +598,9 @@ class Mustache_Compiler
         $findArg  = $this->getFindMethodArgs($method);
         $callable = $this->getCallable('$filter');
         $msg      = var_export($name, true);
+        $value    = $first ? self::FILTER_FIRST_VALUE : self::FILTER_VALUE;
 
-        return sprintf($this->prepare(self::FILTER, $level), $method, $filter, $findArg, $callable, $msg, $this->getFilters($filters, $level));
+        return sprintf($this->prepare(self::FILTER, $level), $method, $filter, $findArg, $callable, $msg, $value, $this->getFilters($filters, $level, false));
     }
 
     const LINE = '$buffer .= "\n";';

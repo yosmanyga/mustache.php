@@ -203,7 +203,13 @@ EOS;
         );
 
         $data = array(
+            'noop' => function ($value) {
+                return $value;
+            },
             'people' => $people,
+            'people_lambda' => function () use ($people) {
+                return $people;
+            },
             'first_name' => function ($arr) {
                 return $arr[0]->name;
             },
@@ -225,6 +231,8 @@ EOS;
             array('{{% FILTERS }}{{ people | last_name }}', $data, 'Charles'),
             array('{{% FILTERS }}{{ people | all_names }}', $data, 'Albert, Betty, Charles'),
             array('{{% FILTERS }}{{# people | first_person }}{{ name }}{{/ people }}', $data, 'Albert'),
+            array('{{% FILTERS }}{{# people_lambda | first_person }}{{ name }}{{/ people_lambda }}', $data, 'Albert'),
+            array('{{% FILTERS }}{{# people_lambda | noop | first_person }}{{ name }}{{/ people_lambda }}', $data, 'Albert'),
         );
     }
 }
