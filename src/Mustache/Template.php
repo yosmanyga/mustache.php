@@ -176,9 +176,9 @@ abstract class Mustache_Template
                 return $this->mustache
                     ->loadLambda($result)
                     ->renderInternal($context);
-            } else {
-                return $result;
             }
+
+            return $result;
         }
 
         return $value;

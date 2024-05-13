@@ -184,4 +184,47 @@ EOS;
             })),
         );
     }
+
+    /**
+     * @group lambdas
+     * @dataProvider lambdaFiltersData
+     */
+    public function testLambdaFilters($tpl, $data, $expect)
+    {
+        $this->assertEquals($expect, $this->mustache->render($tpl, $data));
+    }
+
+    public function lambdaFiltersData()
+    {
+        $people = array(
+            (object) array('name' => 'Albert'),
+            (object) array('name' => 'Betty'),
+            (object) array('name' => 'Charles'),
+        );
+
+        $data = array(
+            'people' => $people,
+            'first_name' => function ($arr) {
+                return $arr[0]->name;
+            },
+            'last_name' => function ($arr) {
+                $last = end($arr);
+
+                return $last->name;
+            },
+            'all_names' => function ($arr) {
+                return implode(', ', array_map(function ($person) { return $person->name; }, $arr));
+            },
+            'first_person' => function ($arr) {
+                return $arr[0];
+            },
+        );
+
+        return array(
+            array('{{% FILTERS }}{{ people | first_name }}', $data, 'Albert'),
+            array('{{% FILTERS }}{{ people | last_name }}', $data, 'Charles'),
+            array('{{% FILTERS }}{{ people | all_names }}', $data, 'Albert, Betty, Charles'),
+            array('{{% FILTERS }}{{# people | first_person }}{{ name }}{{/ people }}', $data, 'Albert'),
+        );
+    }
 }

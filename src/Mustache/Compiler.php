@@ -333,15 +333,20 @@ class Mustache_Compiler
 
             if (%s) {
                 $source = %s;
-                $result = (string) call_user_func($value, $source, %s);
-                if (strpos($result, \'{{\') === false) {
-                    $buffer .= $result;
-                } else {
-                    $buffer .= $this->mustache
-                        ->loadLambda($result%s)
+                $value = call_user_func($value, $source, %s);
+
+                if (is_string($value)) {
+                    if (strpos($value, \'{{\') === false) {
+                        return $value;
+                    }
+
+                    return $this->mustache
+                        ->loadLambda($value%s)
                         ->renderInternal($context);
                 }
-            } elseif (!empty($value)) {
+            }
+
+            if (!empty($value)) {
                 $values = $this->isIterable($value) ? $value : array($value);
                 foreach ($values as $value) {
                     $context->push($value);

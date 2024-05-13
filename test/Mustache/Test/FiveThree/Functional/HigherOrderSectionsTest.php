@@ -60,6 +60,33 @@ class Mustache_Test_FiveThree_Functional_HigherOrderSectionsTest extends PHPUnit
 
         $this->assertEquals(sprintf('[[%s]]', $data['name']), $tpl->render($data));
     }
+
+    /**
+     * @dataProvider nonTemplateLambdasData
+     */
+    public function testNonTemplateLambdas($tpl, $data, $expect)
+    {
+        $this->assertEquals($expect, $this->mustache->render($tpl, $data));
+    }
+
+    public function nonTemplateLambdasData()
+    {
+        $data = array(
+            'lang' => 'en-US',
+            'people' => function () {
+                return array(
+                    (object) array('name' => 'Albert', 'lang' => 'en-GB'),
+                    (object) array('name' => 'Betty'),
+                    (object) array('name' => 'Charles'),
+                );
+            },
+        );
+
+        return array(
+            array("{{# people }} - {{ name }}\n{{/people}}", $data, " - Albert\n - Betty\n - Charles\n"),
+            array("{{# people }} - {{ name }}: {{ lang }}\n{{/people}}", $data, " - Albert: en-GB\n - Betty: en-US\n - Charles: en-US\n"),
+        );
+    }
 }
 
 class Mustache_Test_FiveThree_Functional_Foo
